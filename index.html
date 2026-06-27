@@ -2,6 +2,24 @@
 <html>
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <style>
+  /* Auto-rotate when device is held portrait */
+  @media (orientation: portrait) {
+    html {
+      transform: rotate(90deg);
+      transform-origin: left top;
+      width: 100vh;
+      height: 100vw;
+      overflow: hidden;
+      position: absolute;
+      top: 0;
+      left: 100%;
+    }
+  }
+  </style>
   <title>Bundled Page</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -188,276 +206,322 @@ document.addEventListener('DOMContentLoaded', async function() {
   </script>
 
 <!--
-  ╔══════════════════════════════════════════════════════════╗
-  ║  TRAJETÓRIA · Mobile-Landscape Adapter + Sounds  v4.0   ║
-  ║  Autor adaptação: prof. Marcos Monteiro / Claude AI     ║
-  ║  Compatível: Android/iOS landscape, Chromebook          ║
-  ╚══════════════════════════════════════════════════════════╝
+  ╔════════════════════════════════════════════════════════════╗
+  ║   TRAJETÓRIA · Mobile-Only Landscape Suite  v5.0          ║
+  ║   Layout: [TECLADO VERT. ESQ] [CANVAS] [PAINEL DIR.]      ║
+  ║   Autor adaptação: prof. Marcos Monteiro / Claude AI       ║
+  ╚════════════════════════════════════════════════════════════╝
 -->
 
-<!-- ── PORTRAIT BLOCKER ─────────────────────────────── -->
-<div id="mb-portrait" aria-hidden="true" style="
-  display:none;position:fixed;inset:0;z-index:99999;
-  background:#0e2438;flex-direction:column;align-items:center;
-  justify-content:center;gap:16px;text-align:center;padding:24px;
-  font-family:'Space Grotesk',sans-serif;">
-  <div id="mb-p-icon" style="font-size:56px">&#128241;</div>
+<!-- PORTRAIT BLOCKER (fallback se CSS rotate não funcionar) -->
+<div id="mb-portrait" style="display:none;position:fixed;inset:0;z-index:99999;
+  background:#0e2438;flex-direction:column;align-items:center;justify-content:center;
+  gap:18px;text-align:center;padding:28px;font-family:'Space Grotesk',sans-serif;">
+  <div id="mb-picon" style="font-size:62px">&#128241;</div>
   <h2 style="font-size:22px;font-weight:700;color:#fff;margin:0">Gire o celular!</h2>
-  <p style="font-size:14px;color:#9fc0da;max-width:240px;line-height:1.5;margin:0">
-    <strong>Trajetória</strong> usa a tela na <strong>horizontal</strong>.<br>
-    Vire o dispositivo para continuar.
+  <p style="font-size:14px;color:#9fc0da;max-width:250px;line-height:1.55;margin:0">
+    <strong>Trajetória</strong> é exclusivo para<br>tela <strong>horizontal</strong>.
   </p>
 </div>
 
-<!-- ── SINGLE-ROW NUMPAD ─────────────────────────────── -->
-<!--
-  Layout (13 teclas em 1 linha):
-  [1][2][3][4][5][6][7][8][9][0][.][⌫][LIMPAR]
-  Fica preso no fundo da área do canvas (position:absolute).
-  Visível apenas quando body.mb-on
+<!-- TECLADO VERTICAL ESQUERDO
+     Layout (mão esquerda):
+     [display valor atual     ]
+     [7] [8] [9]
+     [4] [5] [6]
+     [1] [2] [3]
+     [0] [.] [⌫]
+     [      LIMPAR           ]
 -->
-<div id="mb-numpad" role="group" aria-label="Teclado numérico" style="
+<div id="mb-kbd" role="group" aria-label="Teclado numérico" style="
   display:none;
-  position:fixed;bottom:0;left:0;
-  width:60%;          /* cobre só a metade do canvas */
-  height:48px;
+  position:fixed;left:0;top:0;bottom:0;
+  width:76px;z-index:9000;
   background:#0b1a2a;
-  border-top:2px solid #2b4a6b;
-  border-right:1px solid #1d3a57;
-  border-radius:0 8px 0 0;
-  z-index:8000;
-  flex-direction:row;
+  border-right:2px solid #2b4a6b;
+  flex-direction:column;
   align-items:stretch;">
-  <button class="mb-k" data-k="1">1</button>
-  <button class="mb-k" data-k="2">2</button>
-  <button class="mb-k" data-k="3">3</button>
-  <button class="mb-k" data-k="4">4</button>
-  <button class="mb-k" data-k="5">5</button>
-  <button class="mb-k" data-k="6">6</button>
-  <button class="mb-k" data-k="7">7</button>
-  <button class="mb-k" data-k="8">8</button>
-  <button class="mb-k" data-k="9">9</button>
-  <button class="mb-k" data-k="0">0</button>
-  <button class="mb-k mb-dot" data-k=".">.</button>
-  <button class="mb-k mb-bs" data-k="bs">&#9003;</button>
-  <button class="mb-k mb-clr" data-k="clr">LIMPAR</button>
+
+  <div id="mb-disp" style="
+    background:#091a2b;color:#7fe3ee;
+    font-family:'JetBrains Mono',monospace;
+    font-size:13px;font-weight:700;
+    text-align:center;padding:6px 3px;
+    min-height:30px;display:flex;
+    align-items:center;justify-content:center;
+    border-bottom:1px solid #1d3a57;
+    word-break:break-all;line-height:1.2;">0</div>
+
+  <div style="flex:1;display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    grid-template-rows:repeat(4,1fr) 1.35fr;">
+    <button class="mb-k" data-k="7">7</button>
+    <button class="mb-k" data-k="8">8</button>
+    <button class="mb-k" data-k="9">9</button>
+    <button class="mb-k" data-k="4">4</button>
+    <button class="mb-k" data-k="5">5</button>
+    <button class="mb-k" data-k="6">6</button>
+    <button class="mb-k" data-k="1">1</button>
+    <button class="mb-k" data-k="2">2</button>
+    <button class="mb-k" data-k="3">3</button>
+    <button class="mb-k" data-k="0">0</button>
+    <button class="mb-k mb-dot" data-k=".">.</button>
+    <button class="mb-k mb-bs" data-k="bs">&#9003;</button>
+    <button class="mb-k mb-clr" data-k="clr"
+      style="grid-column:1/-1">LIMPAR</button>
+  </div>
 </div>
 
 <style>
-/* ── Portrait icon spin ── */
+/* Portrait icon spin */
 @keyframes mb-spin{from{transform:rotate(0)}to{transform:rotate(90deg)}}
-#mb-p-icon{animation:mb-spin 1.8s ease-in-out infinite alternate;}
-@media(orientation:portrait)and(max-width:900px){#mb-portrait{display:flex!important;}}
+#mb-picon{animation:mb-spin 1.8s ease-in-out infinite alternate;}
 
-/* ── Numpad keys ── */
+/* Keys */
 .mb-k{
-  flex:1;border:none;border-right:1px solid #1d3a57;
+  border:none;
+  border-bottom:1px solid #1d3a57;
+  border-right:1px solid #1d3a57;
   background:#10293f;color:#eaf4fd;
-  font-size:16px;font-weight:700;
-  cursor:pointer;display:flex;align-items:center;justify-content:center;
-  touch-action:manipulation;-webkit-tap-highlight-color:transparent;
+  font-size:18px;font-weight:700;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
   -webkit-user-select:none;user-select:none;
   font-family:'Fredoka',sans-serif;
-  transition:background .08s;
+  transition:background .07s;padding:0;
 }
-.mb-k:last-child{border-right:none;}
+.mb-k:nth-child(3n){border-right:none;}
 .mb-k:active,.mb-k.mb-press{background:#1e3d5c!important;}
-.mb-dot{color:#7fe3ee;font-size:20px;}
-.mb-bs{background:#15304b!important;color:#ff8a63;font-size:17px;flex:1.1;}
-.mb-clr{background:#15304b!important;color:#9fc0da;font-size:12px;
-  letter-spacing:.04em;font-weight:700;flex:1.5;border-right:none;}
+.mb-dot{color:#7fe3ee;font-size:22px;}
+.mb-bs{background:#162a3f!important;color:#ff8a63;font-size:17px;}
+.mb-clr{
+  background:#0e2438!important;color:#9fc0da;
+  font-size:11px;letter-spacing:.08em;font-weight:700;
+  border-right:none;border-bottom:none;
+}
+.mb-clr:active{background:#15304b!important;}
 
-/* ── Active-mode overrides ── */
-body.mb-on #mb-numpad{display:flex!important;}
+/* ══ ACTIVE MODE (body.mb-on) ══ */
+
+body.mb-on #mb-kbd{display:flex!important;}
+
+/* Shift game content right by keyboard width */
+body.mb-on [style*="position:absolute;inset:0;display:flex;flex-direction:column;background:#0e2438"]{
+  left:76px!important;
+  right:0!important;
+}
 
 /* Hide floating canvas hint */
 body.mb-on [data-mb-hint]{display:none!important;}
 
-/* Compact top-bar */
+/* Top bar compact */
 body.mb-on [data-mb-topbar]{
   height:40px!important;padding:0 8px!important;gap:6px!important;}
-body.mb-on [data-mb-topbar] [data-mb-twitter]{display:none!important;}
+body.mb-on [data-mb-twitter]{display:none!important;}
 
-/* Aside: scrollable, pin input at bottom */
+/* Aside: scrollable content + pinned input */
 body.mb-on aside{
+  width:240px!important;
   display:flex!important;flex-direction:column!important;
-  overflow:hidden!important;}
-body.mb-on [data-mb-aside-scroll]{
-  flex:1!important;overflow-y:auto!important;overflow-x:hidden!important;
-  padding:10px 14px 4px!important;
-  -webkit-overflow-scrolling:touch!important;}
-body.mb-on [data-mb-aside-input]{
-  flex:none!important;padding:8px 12px 10px!important;
-  border-top:2px solid #1d3a57!important;
-  background:#0e2438!important;}
-
-/* Canvas area: reserve bottom strip for numpad */
-body.mb-on [data-mb-canvas-col]{padding-bottom:48px!important;}
+  overflow:hidden!important;
+}
+body.mb-on [data-mb-scroll]{
+  flex:1!important;
+  overflow-y:auto!important;overflow-x:hidden!important;
+  -webkit-overflow-scrolling:touch!important;
+  padding:8px 12px 4px!important;
+}
+body.mb-on [data-mb-scroll]::-webkit-scrollbar{width:3px;}
+body.mb-on [data-mb-scroll]::-webkit-scrollbar-track{background:#0e2438;}
+body.mb-on [data-mb-scroll]::-webkit-scrollbar-thumb{background:#2b4a6b;border-radius:2px;}
+body.mb-on [data-mb-input]{
+  flex:none!important;
+  padding:8px 12px 10px!important;
+  border-top:2px solid #2b4a6b!important;
+  background:#0e2438!important;
+}
 </style>
 
 <script>
-/* ════════════════════════════════════════════════════════
-   TRAJETÓRIA MOBILE ADAPTER  –  Self-contained IIFE
-   No external deps | Web Audio API sounds | Polling loop
-   ════════════════════════════════════════════════════════ */
 (function(){
 'use strict';
 
-/* ── 1. AUDIO ENGINE ──────────────────────────────────── */
-var _ac = null;
+/* ── AUDIO ──────────────────────────────────────────────── */
+var _ac=null;
 function ac(){
-  if(!_ac) try{ _ac=new(window.AudioContext||window.webkitAudioContext)(); }catch(e){}
-  if(_ac&&_ac.state==='suspended') _ac.resume();
+  if(!_ac)try{_ac=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}
+  if(_ac&&_ac.state==='suspended')_ac.resume();
   return _ac;
 }
-function tone(freq,dur,type,vol,t0){
-  var a=ac(); if(!a) return;
+function tone(f,d,type,vol,t0){
+  var a=ac();if(!a)return;
   try{
-    var o=a.createOscillator(), g=a.createGain();
-    o.connect(g); g.connect(a.destination);
-    o.type=type||'sine'; o.frequency.value=freq;
+    var o=a.createOscillator(),g=a.createGain();
+    o.connect(g);g.connect(a.destination);
+    o.type=type||'sine';o.frequency.value=f;
     var t=(t0||0)+a.currentTime;
-    g.gain.setValueAtTime(vol||0.25,t);
-    g.gain.exponentialRampToValueAtTime(0.001,t+dur);
-    o.start(t); o.stop(t+dur+0.05);
+    g.gain.setValueAtTime(vol||0.22,t);
+    g.gain.exponentialRampToValueAtTime(0.001,t+d);
+    o.start(t);o.stop(t+d+0.05);
   }catch(e){}
 }
-function noise(dur,vol,t0){
-  var a=ac(); if(!a) return;
+function noise(d,vol,t0){
+  var a=ac();if(!a)return;
   try{
-    var buf=a.createBuffer(1,a.sampleRate*dur,a.sampleRate);
-    var d=buf.getChannelData(0);
-    for(var i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*(vol||0.15);
-    var s=a.createBufferSource(), g=a.createGain();
-    s.buffer=buf; s.connect(g); g.connect(a.destination);
+    var buf=a.createBuffer(1,a.sampleRate*d,a.sampleRate);
+    var data=buf.getChannelData(0);
+    for(var i=0;i<data.length;i++)data[i]=(Math.random()*2-1)*(vol||0.1);
+    var s=a.createBufferSource(),g=a.createGain();
+    s.buffer=buf;s.connect(g);g.connect(a.destination);
     var t=(t0||0)+a.currentTime;
-    g.gain.setValueAtTime(vol||0.15,t);
-    g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+    g.gain.setValueAtTime(vol||0.1,t);
+    g.gain.exponentialRampToValueAtTime(0.001,t+d);
     s.start(t);
   }catch(e){}
 }
-
 var SFX={
-  tap:   function(){ tone(500,0.05,'square',0.08); },
-  numpad:function(){ tone(660,0.04,'square',0.07); },
-  launch:function(){
-    var a=ac(); if(!a) return;
+  key:    function(){tone(580,0.04,'square',0.07);},
+  tap:    function(){tone(440,0.05,'square',0.08);},
+  launch: function(){
+    var a=ac();if(!a)return;
     try{
       var o=a.createOscillator(),g=a.createGain();
       o.connect(g);g.connect(a.destination);
       o.type='sawtooth';
-      o.frequency.setValueAtTime(900,a.currentTime);
-      o.frequency.exponentialRampToValueAtTime(80,a.currentTime+0.32);
-      g.gain.setValueAtTime(0.25,a.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+0.35);
-      o.start(a.currentTime); o.stop(a.currentTime+0.38);
+      o.frequency.setValueAtTime(880,a.currentTime);
+      o.frequency.exponentialRampToValueAtTime(80,a.currentTime+0.3);
+      g.gain.setValueAtTime(0.24,a.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+0.33);
+      o.start(a.currentTime);o.stop(a.currentTime+0.36);
     }catch(e){}
   },
   hit:function(){
-    // boom + sparkle + crowd noise
-    tone(110,0.35,'sine',0.45);
-    [880,1100,1400,1760].forEach(function(f,i){ tone(f,0.14,'sine',0.14,i*0.05); });
-    noise(0.4,0.18,0.05);
+    tone(100,0.38,'sine',0.42);
+    [880,1100,1400,1760].forEach(function(f,i){tone(f,0.13,'sine',0.13,i*0.05);});
+    noise(0.38,0.15,0.05);
   },
   miss:function(){
-    [330,280,240,195].forEach(function(f,i){ tone(f,0.2,'sawtooth',0.2,i*0.11); });
-  },
-  star:function(){
-    [523,659,784,1047].forEach(function(f,i){ tone(f,0.13,'sine',0.22,i*0.08); });
+    [320,270,235,190].forEach(function(f,i){tone(f,0.2,'sawtooth',0.18,i*0.12);});
   },
   unlock:function(){
-    [523,659,784,1047,1319,1568].forEach(function(f,i){ tone(f,0.17,'sine',0.24,i*0.09); });
+    [523,659,784,1047,1319,1568].forEach(function(f,i){tone(f,0.16,'sine',0.24,i*0.09);});
   }
 };
-
-// Unlock AudioContext on first gesture
 ['touchstart','mousedown'].forEach(function(ev){
-  document.addEventListener(ev,function u(){ ac(); document.removeEventListener(ev,u); },{once:true,passive:true});
+  document.addEventListener(ev,function u(){ac();document.removeEventListener(ev,u);},{once:true,passive:true});
 });
 
-/* ── 2. ORIENTATION / PORTRAIT BLOCKER ───────────────── */
-function checkOrientation(){
-  var bl=document.getElementById('mb-portrait'); if(!bl) return;
-  var mob=window.innerWidth<1100;
-  bl.style.display=(mob&&window.innerHeight>window.innerWidth)?'flex':'none';
+/* ── PORTRAIT BLOCKER (JS fallback) ─────────────────── */
+function chkPort(){
+  var bl=document.getElementById('mb-portrait');if(!bl)return;
+  // Only show if CSS rotate is NOT supported (rare)
+  var port=window.innerHeight>window.innerWidth;
+  // If CSS handles it (transform), hide JS blocker
+  // Show only when definitely portrait AND no CSS rotation applied
+  bl.style.display='none'; // CSS @media handles it
 }
-window.addEventListener('resize',checkOrientation);
-window.addEventListener('orientationchange',function(){setTimeout(checkOrientation,250);});
-setTimeout(checkOrientation,500);
+window.addEventListener('resize',chkPort);
+window.addEventListener('orientationchange',function(){setTimeout(chkPort,200);});
 
-/* ── 3. MOBILE LANDSCAPE DETECTION ───────────────────── */
-function isMobLand(){
-  return window.innerWidth<1250 && window.innerHeight<680 && window.innerWidth>window.innerHeight;
+/* ── SCREEN ORIENTATION LOCK ─────────────────────────── */
+function tryLockLandscape(){
+  try{
+    var so=screen.orientation;
+    if(so&&so.lock)so.lock('landscape').catch(function(){});
+  }catch(e){}
 }
+document.addEventListener('touchstart',function fl(){
+  tryLockLandscape();
+  document.removeEventListener('touchstart',fl);
+},{once:true,passive:true});
 
-/* ── 4. GAME ELEMENT HELPERS ──────────────────────────── */
-function realInput(){ return document.querySelector('input[inputmode="decimal"]'); }
+/* ── HELPERS ─────────────────────────────────────────── */
+function realInp(){return document.querySelector('input[inputmode="decimal"]');}
 function fireBtn(){
   var bb=document.querySelectorAll('button');
   for(var i=0;i<bb.length;i++){
-    if((bb[i].style.background||'').indexOf('ff6a3d')>-1&&!bb[i].id) return bb[i];
-  }
-  return null;
+    if((bb[i].style.background||'').indexOf('ff6a3d')>-1&&!bb[i].id)return bb[i];
+  }return null;
 }
 function nextBtn(){
   var bb=document.querySelectorAll('button');
   for(var i=0;i<bb.length;i++){
-    if((bb[i].style.background||'').indexOf('46c66d')>-1) return bb[i];
-  }
-  return null;
+    if((bb[i].style.background||'').indexOf('46c66d')>-1)return bb[i];
+  }return null;
 }
 
-/* ── 5. DOM TAGGING ───────────────────────────────────── */
-// We tag elements once per game-screen entry so CSS can target them.
+/* ── NUMPAD ──────────────────────────────────────────── */
+var disp=document.getElementById('mb-disp');
+function setVal(v){
+  var inp=realInp();if(!inp)return;
+  var s=Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,'value');
+  s.set.call(inp,v);
+  inp.dispatchEvent(new Event('input',{bubbles:true}));
+  if(disp)disp.textContent=v||'0';
+}
+function syncDisp(){
+  var inp=realInp();
+  if(inp&&disp)disp.textContent=inp.value||'0';
+}
+function onKey(k){
+  SFX.key();
+  var cur=(realInp()||{value:''}).value;
+  if(k==='clr')setVal('');
+  else if(k==='bs')setVal(cur.slice(0,-1));
+  else if(k==='.')cur.indexOf('.')===-1&&setVal(cur+'.');
+  else cur.replace(/\D/g,'').length<6&&setVal(cur+k);
+}
+document.querySelectorAll('#mb-kbd .mb-k').forEach(function(btn){
+  btn.addEventListener('touchstart',function(e){
+    e.preventDefault();btn.classList.add('mb-press');onKey(btn.dataset.k);
+  },{passive:false});
+  btn.addEventListener('touchend',function(){btn.classList.remove('mb-press');});
+  btn.addEventListener('click',function(){onKey(btn.dataset.k);});
+});
+document.addEventListener('keydown',function(e){
+  if(e.key==='Enter'){
+    var nb=nextBtn();if(nb){nb.click();return;}
+    var fb=fireBtn();if(fb&&!fb.disabled)fb.click();
+  }
+});
+
+/* ── DOM TAGGING ─────────────────────────────────────── */
 var tagged=false;
 function tagDOM(){
-  if(tagged) return;
-  var cv=document.getElementById('traj-canvas'); if(!cv) return;
+  if(tagged)return;
+  var cv=document.getElementById('traj-canvas');if(!cv)return;
 
-  /* canvas column (flex item containing canvas + hint) */
-  var col=cv.closest('div[style*="flex:1;position:relative"]');
-  if(col) col.setAttribute('data-mb-canvas-col','');
-
-  /* floating hint */
+  // Hint
   document.querySelectorAll('[style*="left:18px"][style*="bottom:16px"]').forEach(function(el){
     el.setAttribute('data-mb-hint','');
   });
-
-  /* top bar */
+  // Top bar
   document.querySelectorAll('[style*="height:58px"][style*="background:#0b1a2a"]').forEach(function(el){
     el.setAttribute('data-mb-topbar','');
-    // tag twitter/bird icon
     el.querySelectorAll('span').forEach(function(sp){
-      if(sp.textContent.indexOf('\uD83D\uDC26')>-1) sp.setAttribute('data-mb-twitter','');
+      if(sp.textContent.indexOf('\uD83D\uDC26')>-1)sp.setAttribute('data-mb-twitter','');
     });
   });
-
-  /* aside scroll zone & input zone */
-  var inp=realInput();
+  // Aside split
+  var inp=realInp();
   if(inp){
-    /* walk up to find "SUA RESPOSTA" container and its parent */
-    var node=inp;
-    while(node && node.tagName!=='ASIDE'){
+    var node=inp.parentElement;
+    while(node&&node.tagName!=='ASIDE'){
       var prev=node.previousElementSibling;
-      if(prev && prev.textContent && prev.textContent.trim()==='SUA RESPOSTA'){
-        // node is the flex row with input+button
-        var section=node.parentElement; // div wrapping label+row
+      if(prev&&prev.textContent&&prev.textContent.trim()==='SUA RESPOSTA'){
+        var section=node.parentElement;
         if(section){
-          section.setAttribute('data-mb-aside-input','');
-          /* everything before this section = scroll zone */
-          var aside=section.parentElement;
-          if(aside && aside.tagName==='DIV'){
-            var before=document.createElement('div');
-            before.setAttribute('data-mb-aside-scroll','');
-            before.style.cssText='display:contents';
-            /* wrap all siblings before section */
-            var kids=Array.from(aside.children);
-            var wrap=document.createElement('div');
-            wrap.setAttribute('data-mb-aside-scroll','');
-            kids.forEach(function(k){
-              if(k!==section) wrap.appendChild(k);
+          section.setAttribute('data-mb-input','');
+          var inner=section.parentElement;
+          if(inner){
+            var scroll=document.createElement('div');
+            scroll.setAttribute('data-mb-scroll','');
+            Array.from(inner.children).forEach(function(k){
+              if(k!==section)scroll.appendChild(k);
             });
-            aside.insertBefore(wrap,section);
+            inner.insertBefore(scroll,section);
           }
         }
         break;
@@ -465,102 +529,52 @@ function tagDOM(){
       node=node.parentElement;
     }
   }
-
   tagged=true;
 }
 
-/* ── 6. NUMPAD ────────────────────────────────────────── */
-function setVal(v){
-  var inp=realInput(); if(!inp) return;
-  var setter=Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,'value');
-  setter.set.call(inp,v);
-  inp.dispatchEvent(new Event('input',{bubbles:true}));
-}
-function handleKey(k){
-  SFX.numpad();
-  var cur=(realInput()||{value:''}).value;
-  if(k==='clr'){ setVal(''); }
-  else if(k==='bs'){ setVal(cur.slice(0,-1)); }
-  else if(k==='.'){ if(cur.indexOf('.')===-1) setVal(cur+'.'); }
-  else { if(cur.replace('-','').replace('.','').length<6) setVal(cur+k); }
-}
-
-var numpad=document.getElementById('mb-numpad');
-numpad.querySelectorAll('.mb-k').forEach(function(btn){
-  btn.addEventListener('touchstart',function(e){
-    e.preventDefault();
-    btn.classList.add('mb-press');
-    handleKey(btn.dataset.k);
-  },{passive:false});
-  btn.addEventListener('touchend',function(){ btn.classList.remove('mb-press'); });
-  btn.addEventListener('click',function(){ handleKey(btn.dataset.k); });
-});
-
-/* Enter on native keyboard also fires */
-document.addEventListener('keydown',function(e){
-  if(e.key==='Enter'){
-    var nb=nextBtn(); if(nb){ nb.click(); return; }
-    var fb=fireBtn(); if(fb&&!fb.disabled) fb.click();
-  }
-});
-
-/* ── 7. SOUND HOOKS ──────────────────────────────────── */
-var hookedFire=null, hookedBtns=new WeakSet(), lastFbSig='';
-
-function hookGameSounds(){
-  /* fire button */
+/* ── SOUND HOOKS ─────────────────────────────────────── */
+var hookedFire=null,hookedBtns=new WeakSet(),lastFbSig='';
+function hookSounds(){
   var fb=fireBtn();
-  if(fb && fb!==hookedFire){
+  if(fb&&fb!==hookedFire){
     hookedFire=fb;
-    fb.addEventListener('click',function(){ if(!fb.disabled) SFX.launch(); });
+    fb.addEventListener('click',function(){if(!fb.disabled)SFX.launch();});
   }
-  /* all other buttons */
   document.querySelectorAll('button').forEach(function(b){
-    if(!hookedBtns.has(b)){
-      hookedBtns.add(b);
-      b.addEventListener('click',function(){ SFX.tap(); });
-    }
+    if(!hookedBtns.has(b)){hookedBtns.add(b);b.addEventListener('click',SFX.tap);}
   });
-  /* feedback observation */
-  var fbEl=document.querySelector('[style*="fbBg"]')||
-           document.querySelector('[data-dc-bind*="fbTitle"]');
-  // Instead detect via text content of feedback divs
-  var allBig=document.querySelectorAll('[style*="font-size:64px"],[style*="font-size:46px"]');
-  allBig.forEach(function(el){
+  document.querySelectorAll('[style*="font-size:64px"],[style*="font-size:46px"]').forEach(function(el){
     var txt=el.textContent||'';
-    if(txt===lastFbSig) return;
+    if(txt===lastFbSig)return;
     lastFbSig=txt;
-    if(txt.indexOf('ACERTOU')>-1||txt.indexOf('Parab')>-1) SFX.hit();
-    else if(txt.indexOf('errou')>-1||txt.indexOf('Ops')>-1) SFX.miss();
-    else if(txt.indexOf('Skin')>-1||txt.indexOf('desbloq')>-1) SFX.unlock();
+    if(/ACERTOU|Parab/i.test(txt))SFX.hit();
+    else if(/errou|Ops/i.test(txt))SFX.miss();
+    else if(/Skin|desbloq/i.test(txt))SFX.unlock();
   });
 }
 
-/* ── 8. MAIN POLLING LOOP ────────────────────────────── */
+/* ── MAIN LOOP ───────────────────────────────────────── */
 var wasGame=false;
 function tick(){
   var inGame=!!document.getElementById('traj-canvas');
-  var mob=isMobLand();
-
-  if(inGame && mob){
-    if(!document.body.classList.contains('mb-on')){
-      document.body.classList.add('mb-on');
-    }
-    if(!wasGame){ tagged=false; setTimeout(tagDOM,350); }
+  var land=window.innerWidth>window.innerHeight;
+  if(inGame&&land){
+    document.body.classList.add('mb-on');
+    if(!wasGame){tagged=false;setTimeout(tagDOM,350);setTimeout(hookSounds,600);}
     wasGame=true;
-    hookGameSounds();
+    syncDisp();
+    hookSounds();
   } else {
     document.body.classList.remove('mb-on');
     wasGame=false;
   }
 }
-setInterval(tick,200);
-window.addEventListener('resize',function(){setTimeout(tick,120);setTimeout(checkOrientation,180);});
+setInterval(tick,180);
+window.addEventListener('resize',function(){setTimeout(tick,100);});
 
-})(); /* end IIFE */
+})();
 </script>
-
-<!-- end mobile adapter -->
+<!-- end Trajetória Mobile Suite v5 -->
 
 </body>
 </html>
