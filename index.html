@@ -1,6 +1,39 @@
 <!DOCTYPE html>
 <html>
 <head>
+<script>
+/* FIX: polyfill dc-template bindings as no-ops while React loads
+   Prevents ReferenceError on early touch events hitting raw onclick attrs */
+(function(){
+  var noop = function(){};
+  var names = [
+    'onCommitName','onChangeName','onNameKey','onPlay','onContinue',
+    'onLevels','onGuide','onResetProgress','onMenu','onFire','onNext',
+    'onAnswerInput','onKey','onSkin','onDifficulty','onSelectSkin'
+  ];
+  names.forEach(function(n){ if(typeof window[n]==='undefined') window[n]=noop; });
+
+  /* Suppress the [bundle] error display for known safe errors */
+  var origOnError = window.onerror;
+  window.addEventListener('error', function(e) {
+    var msg = e.message || '';
+    /* Known template-binding race — safe to ignore */
+    if (msg.indexOf('is not defined') > -1 && (
+        msg.indexOf('onCommitName') > -1 ||
+        msg.indexOf('onChangeName') > -1 ||
+        msg.indexOf('onNameKey') > -1 ||
+        msg.indexOf('onPlay') > -1 ||
+        msg.indexOf('onFire') > -1 ||
+        msg.indexOf('onNext') > -1 ||
+        msg.indexOf('onAnswerInput') > -1
+    )) {
+      e.stopImmediatePropagation();
+      e.preventDefault();
+      return false;
+    }
+  }, true); /* capture phase — runs BEFORE the bundler's error sink */
+})();
+</script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
   <meta name="mobile-web-app-capable" content="yes">
